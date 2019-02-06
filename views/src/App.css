@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  background-image: url("/images/white-waves.png");
 }
 
 nav{
@@ -12,7 +13,7 @@ nav{
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
+  animation: App-logo-spin infinite 1s linear;
   height: 10vmin;
 }
 
@@ -42,7 +43,7 @@ nav{
 
 .body{
   height: 100%;
-  background-color: #f8f9fa;
+  /*background-color: #f8f9fa;*/
 }
 
 .select-regions{

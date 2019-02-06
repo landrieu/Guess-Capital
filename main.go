@@ -76,7 +76,7 @@ func main() {
 	initializeRoutes()
 
 	// Start and run the server
-	router.Run(":8080")
+	router.Run(":8081")
 }
 
 func initializeRoutes() {
@@ -86,7 +86,23 @@ func initializeRoutes() {
 	//api.OPTIONS("", handleVerification)
 	api.GET("", handleGet)
 
+	/****  REST API ****/
+	//Countries
 	api.GET("/countries", CountryHandler)
+	//api.POST("/countries", CountryHandler)
+	//api.DELETE("/countries", CountryHandler)
+	//api.PUT("/countries", CountryHandler)
+
+	//api.GET("/countries/:countryCode", CountryHandler)
+	//Cannot post
+	//api.POST("/countries/:countryCode", CountryHandler)
+	//api.DELETE("/countries/:countryID", CountryHandler)
+	//api.PUT("/countries/:countryID", CountryHandler)
+
+	//Continent
+	//api.GET("/continents", GetContinentFromContinentName)
+
+
 	api.GET("/countries/country/:countryCode", GetCountryFromCountryCode)
 	api.GET("/countries/continent/:continentName", GetContinentFromContinentName)
 	api.POST("/countries/addPeople/:countryCode", AddPeople)
