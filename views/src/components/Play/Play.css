@@ -11,7 +11,52 @@
 }
 
 .quizz-prop-inner div{
-    width: 110px;
+    min-width: 110px;
+    width: 18%;
     text-align: center;
     cursor: pointer;
+    background-color: #f4efef;
+    border: 2px #a5a5a5 solid;
+    height: 50px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-bar-container{
+    height: 20px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: hidden;
+}
+
+.progress-bar-quizz{
+    background-color: #b8b8b8;
+    height: 3px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.progress-bar-quizz-fill{
+    width: 100%;
+    transition: 1s;
+    background-color: #007bff;
+    height: 100%;
+}
+
+.round-steps{
+    height: 15px;
+    width: 100%;
+    display: flex;
+    margin-top: -9px;
+    justify-content: space-between;
+}
+
+.round{
+    height: 14px;
+    width: 14px;
+    border-radius: 12px;
+    background-color: #007bff;
 }

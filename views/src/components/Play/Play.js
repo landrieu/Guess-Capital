@@ -9,7 +9,8 @@ export default class Play extends Component {
         challengeSteps: [],
         randomPropertiesCountries: [],
         currentSuggestions: null,
-        quizzProperties: ["name", "capital", "population"]
+        quizzProperties: ["name", "capital", "population"],
+        currentAnswer: {}
     }
 
     componentDidMount(){
@@ -110,12 +111,54 @@ export default class Play extends Component {
         return this.state.randomPropertiesCountries[this.getStep()][prop];
     }
 
+    getProgressBarStyle = () => {
+        return {
+            width: (100 * (this.state.step / 9)) + "%",
+        }
+    }
+
+    createRounds = () => {
+        let rounds = []
+    
+        for (let i = 0; i < 10; i++) {
+          rounds.push(<div className="round" key={"round" + i} style={this.getRoundColor(i)}></div>)
+        }
+        return rounds
+    }
+
+    setAnswer = (prop, ans, idx) => {
+        console.log(prop + " " + ans);
+        //this.state.currentSuggestions[prop][idx].selected = true;
+        //this.setState({currentSuggestions: this.state.currentSuggestions});
+    }
+
+    getRoundColor = (i) => {
+        //var blue = "#007bff";
+        var grey = "#b8b8b8";
+        var color = grey;
+        return {
+            backgroundColor: color,
+        }
+    }
+
+    getAnswerStyle = (prop) => {
+        var selected = this.state.currentSuggestions[prop].selected || false;
+        console.log("SELECTED: " + selected);
+        return{
+            backgroundColor: selected ? "blue" : "#f5f5f5"
+        }
+    }
+
+    confirmAnswers = () => {
+        console.log("Confirm");
+    }
+
     renderRandomProp(prop){
         if(this.state.currentSuggestions){
             return(
             this.state.currentSuggestions[prop].map((p, i) => {
                 return(
-                    <div key={p+i}>{p}</div>
+                    <div key={p+i} onClick={this.setAnswer.bind(this, prop, p, i)} style={this.getAnswerStyle(prop)}>{p}</div>
                 )
             })
             )
@@ -127,16 +170,19 @@ export default class Play extends Component {
             <div>
 
                 <p>Here</p>
+                <div className="progress-bar-container">
+                    <div className="progress-bar-quizz">
+                        <div className="progress-bar-quizz-fill" style={this.getProgressBarStyle()}></div>
+                    </div>
+                    <div className="round-steps">
+                        {this.createRounds()}
+                    </div>
+                </div>
                 <div>
                     <div>
                         <div className="country-info">
                             <div className="country-container">
                                 <img src={this.props.countries[this.getStep()].flag} alt="country" height="100" />
-                                <p>Name: <b>{this.props.countries[this.state.step].name}</b><br></br>
-                                Population: <b>{this.props.countries[this.state.step].population}</b><br></br>
-                                Region: <b>{this.props.countries[this.state.step].region}</b><br></br>
-                                Subregion: <b>{this.props.countries[this.state.step].subregion}</b><br></br>
-                                Capital: <b>{this.props.countries[this.state.step].capital}</b></p>
                             </div>
                         </div>
                     </div>
@@ -153,6 +199,9 @@ export default class Play extends Component {
                         ) 
                     })}
                     </div>
+                    <div className="confirm-button">
+                        <button type="button" className="btn btn-primary" onClick={this.confirmAnswers.bind(this)}>Confirm</button>
+                    </div>
                 </div>
                 <div className="section-play-buttons">
                     <button type="button" className={(this.state.step !== 0) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, false)}>Previous</button>
@@ -162,6 +211,16 @@ export default class Play extends Component {
         )
     }
 }
+
+/* 
+<p>Name: <b>{this.props.countries[this.state.step].name}</b><br></br>
+    Population: <b>{this.props.countries[this.state.step].population}</b><br></br>
+    Region: <b>{this.props.countries[this.state.step].region}</b><br></br>
+    Subregion: <b>{this.props.countries[this.state.step].subregion}</b><br></br>
+    Capital: <b>{this.props.countries[this.state.step].capital}</b></p>
+*/
+
+
 /**
  * 
  */
