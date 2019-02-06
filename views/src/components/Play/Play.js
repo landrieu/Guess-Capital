@@ -7,15 +7,22 @@ export default class Play extends Component {
         step: 0,
         score: 0,
         challengeSteps: [],
+        quizzAnswers: [],
         randomPropertiesCountries: [],
-        currentSuggestions: null,
-        quizzProperties: ["name", "capital", "population"],
+        //currentSuggestions: null,
+        quizzProperties: ["name", "capital"/*, "population"*/],
         currentAnswer: {}
     }
 
     componentDidMount(){
         this.pickRandomProperties();
         
+        var n = 10;
+        var arr = []
+        for (var i = 0; i < n; i++){
+            arr.push({});
+        }
+        this.setState({quizzAnswers: arr});
         //this.initChallengeSteps();
     }
 
@@ -34,22 +41,18 @@ export default class Play extends Component {
            return array;
         }
 
-        var properties = ["name", "capital", "population"];
         var tempShuffledArr = [];
         var tempShuffledObj = {};
         
         for(let i = 0; i < 10; i++){
             tempShuffledObj = {};
-            properties.forEach((p) => {
+            this.state.quizzProperties.forEach((p) => {
                 tempShuffledObj[p] = shuffleArray(randomPropertiesCountries[i][p]);
             });
             tempShuffledArr.push(tempShuffledObj);
         }
 
-        this.setState({randomPropertiesCountries: tempShuffledArr},() => {
-            console.log(this.state.randomPropertiesCountries);
-            this.setCurrentSuggestions();
-        });
+        this.setState({randomPropertiesCountries: tempShuffledArr});
     }
 
     pickRandomProperties = () => {
@@ -87,7 +90,6 @@ export default class Play extends Component {
         if(increment && this.state.step > 8) return;
         let newStep = increment ? this.state.step + 1 : this.state.step - 1;
         this.setState({step: newStep});
-        this.setCurrentSuggestions(newStep);
     }
 
     getStep = () => {
@@ -98,11 +100,11 @@ export default class Play extends Component {
         return this.props.countries[this.getStep()][prop];
     }
 
-    setCurrentSuggestions = (step) => {
+    /*setCurrentSuggestions = (step) => {
         console.log(s + " " + this.state.step);
         let s =  step || this.state.step;
         this.setState({currentSuggestions: this.state.randomPropertiesCountries[s]});
-    }
+    }*/
     getCurrentProperties = (prop) => {
         if(!(this.state.randomPropertiesCountries.length > 0)){
             return null;
@@ -126,8 +128,10 @@ export default class Play extends Component {
         return rounds
     }
 
-    setAnswer = (prop, ans, idx) => {
-        console.log(prop + " " + ans);
+    setAnswer = (prop, ans) => {
+        this.state.quizzAnswers[this.state.step][prop] = ans;
+        this.setState({quizzAnswers: this.state.quizzAnswers});
+        console.log(this.state.quizzAnswers);
         //this.state.currentSuggestions[prop][idx].selected = true;
         //this.setState({currentSuggestions: this.state.currentSuggestions});
     }
@@ -141,35 +145,35 @@ export default class Play extends Component {
         }
     }
 
-    getAnswerStyle = (prop) => {
-        var selected = this.state.currentSuggestions[prop].selected || false;
-        console.log("SELECTED: " + selected);
+    getAnswerStyle = (prop, p) => {
+        var selected = p === this.state.quizzAnswers[this.state.step][prop];
+
         return{
-            backgroundColor: selected ? "blue" : "#f5f5f5"
+            backgroundColor: selected ? "#0069d9" : "#f5f5f5",
+            color: selected ? "white" : "#212529",
+            fontWeight: selected ? 500 : "normal",
+            borderColor: selected ? "#0069d9" :"#a5a5a5"
         }
     }
 
     confirmAnswers = () => {
         console.log("Confirm");
+        
     }
 
-    renderRandomProp(prop){
-        if(this.state.currentSuggestions){
-            return(
-            this.state.currentSuggestions[prop].map((p, i) => {
+    renderRandomProp(prop){        
+        return(
+            (this.state.randomPropertiesCountries.length > 0) && this.state.randomPropertiesCountries[this.state.step][prop].map((p, i) => {
                 return(
-                    <div key={p+i} onClick={this.setAnswer.bind(this, prop, p, i)} style={this.getAnswerStyle(prop)}>{p}</div>
-                )
-            })
+                <div key={p+i} onClick={this.setAnswer.bind(this, prop, p)} style={this.getAnswerStyle(prop, p)}>{p}</div>
             )
-        }
+        })
+        )
     }
 
     render() {
         return (
             <div>
-
-                <p>Here</p>
                 <div className="progress-bar-container">
                     <div className="progress-bar-quizz">
                         <div className="progress-bar-quizz-fill" style={this.getProgressBarStyle()}></div>
@@ -187,9 +191,9 @@ export default class Play extends Component {
                         </div>
                     </div>
                     <div className="quizz-info">
-                    {this.state.quizzProperties.map((prop) => {                       
+                    {this.state.quizzProperties.map((prop, i) => {                       
                         return (
-                        <div className="" key={prop} >
+                        <div className="" key={i + " " + prop} >
                             <div className="quizz-prop-container">
                                 <div className="quizz-prop-inner">
                                     {this.renderRandomProp(prop)}

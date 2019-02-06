@@ -5,7 +5,7 @@ import cloneDeep from 'lodash/cloneDeep';
 
 //Components
 import Parameters from './components/services/Parameters'
-import Header from './components/Header/Header'
+//import Header from './components/Header/Header'
 import Play from './components/Play/Play'
 //Others
 import logo from './logo.svg';
