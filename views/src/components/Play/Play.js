@@ -120,10 +120,23 @@ export default class Play extends Component {
     }
 
     createRounds = () => {
-        let rounds = []
-    
+        let rounds = [];
+        let stepCompleted;
+        let roundClass;
+
         for (let i = 0; i < 10; i++) {
-          rounds.push(<div className="round" key={"round" + i} style={this.getRoundColor(i)}></div>)
+            
+            if(this.state.quizzAnswers.length > 0){
+                stepCompleted = true;
+                for(let j = 0; j < this.state.quizzProperties.length; j++){
+                    if(!this.state.quizzAnswers[i][this.state.quizzProperties[j]]){
+                        stepCompleted = false;
+                    }
+                }
+            }
+            
+            roundClass = "round" + (stepCompleted ? " step-completed" : "");
+            rounds.push(<div className={roundClass} key={"round" + i}></div>)
         }
         return rounds
     }
@@ -134,15 +147,6 @@ export default class Play extends Component {
         console.log(this.state.quizzAnswers);
         //this.state.currentSuggestions[prop][idx].selected = true;
         //this.setState({currentSuggestions: this.state.currentSuggestions});
-    }
-
-    getRoundColor = (i) => {
-        //var blue = "#007bff";
-        var grey = "#b8b8b8";
-        var color = grey;
-        return {
-            backgroundColor: color,
-        }
     }
 
     getAnswerStyle = (prop, p) => {
