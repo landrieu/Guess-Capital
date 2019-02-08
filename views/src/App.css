@@ -180,3 +180,6 @@ nav{
   justify-content: space-around;
   height: 46px;
 }
+.section-play-buttons button{
+  width: 90px;
+}

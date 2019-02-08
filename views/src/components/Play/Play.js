@@ -5,13 +5,16 @@ import './Play.css';
 export default class Play extends Component {
     state = {
         step: 0,
-        score: 0,
         challengeSteps: [],
         quizzAnswers: [],
         randomPropertiesCountries: [],
         //currentSuggestions: null,
         quizzProperties: ["name", "capital"/*, "population"*/],
-        currentAnswer: {}
+        currentAnswer: {},
+        score: {
+            goodAnswers: 0,
+            nbAnswers: 0
+        }
     }
 
     componentDidMount(){
@@ -121,42 +124,77 @@ export default class Play extends Component {
 
     createRounds = () => {
         let rounds = [];
-        let stepCompleted;
-        let roundClass;
+        let answeredDone;
+        let nbProperties = this.state.quizzProperties.length;
 
         for (let i = 0; i < 10; i++) {
-            
+            answeredDone = 0
             if(this.state.quizzAnswers.length > 0){
-                stepCompleted = true;
                 for(let j = 0; j < this.state.quizzProperties.length; j++){
-                    if(!this.state.quizzAnswers[i][this.state.quizzProperties[j]]){
-                        stepCompleted = false;
+                    if(this.state.quizzAnswers[i][this.state.quizzProperties[j]]){
+                        answeredDone += 1;
                     }
                 }
             }
-            
-            roundClass = "round" + (stepCompleted ? " step-completed" : "");
-            rounds.push(<div className={roundClass} key={"round" + i}></div>)
+
+            rounds.push(
+            <div className="round" key={"round" + i}>
+                <div className="partial-round" style={{height: ((answeredDone/nbProperties) * 100) + "%"}}>
+                </div>
+            </div>
+            )
         }
         return rounds
     }
 
     setAnswer = (prop, ans) => {
-        this.state.quizzAnswers[this.state.step][prop] = ans;
-        this.setState({quizzAnswers: this.state.quizzAnswers});
-        console.log(this.state.quizzAnswers);
-        //this.state.currentSuggestions[prop][idx].selected = true;
-        //this.setState({currentSuggestions: this.state.currentSuggestions});
+        if(!this.state.quizzAnswers[this.state.step][prop]){
+            this.state.quizzAnswers[this.state.step][prop] = ans;
+            let tempScore = this.state.score;
+ 
+            if(ans === this.props.countries[this.state.step][prop]){
+                tempScore.goodAnswers += 1;
+            }
+            tempScore.nbAnswers += 1;
+    
+            this.setState({quizzAnswers: this.state.quizzAnswers, score: tempScore});
+        }
     }
 
     getAnswerStyle = (prop, p) => {
-        var selected = p === this.state.quizzAnswers[this.state.step][prop];
+        let step = this.state.step;
+        let correctAnswer = this.props.countries[step][prop];
+        let currentAnswer = this.state.quizzAnswers[this.state.step][prop];
+        let backgroundColor = "#f5f5f5";
+        let color = "#212529";
+        let fontWeight = "normal";
+        let borderColor = "#a5a5a5";
+
+        //let correctSuggestion = correctAnswer === p;
+        //let isUserCorrect = correctAnswer === currentAnswer;
+
+        if(correctAnswer === p && correctAnswer === currentAnswer){
+            backgroundColor = "#2aa876";
+            color = "white";
+            fontWeight = 500;
+            borderColor = "#2ba896";
+        }else if(currentAnswer && currentAnswer === p){
+            backgroundColor = "#e8554e";
+            color = "white";
+            fontWeight = 500;
+            borderColor = "#e85549";
+        }else if(currentAnswer && correctAnswer === p){
+            backgroundColor = "#2aa876";
+            color = "white";
+            fontWeight = 500;
+            borderColor = "#2ba896";
+        }
 
         return{
-            backgroundColor: selected ? "#0069d9" : "#f5f5f5",
-            color: selected ? "white" : "#212529",
-            fontWeight: selected ? 500 : "normal",
-            borderColor: selected ? "#0069d9" :"#a5a5a5"
+            backgroundColor: backgroundColor,
+            color: color,
+            fontWeight: fontWeight,
+            borderColor: borderColor
         }
     }
 
@@ -169,7 +207,7 @@ export default class Play extends Component {
         return(
             (this.state.randomPropertiesCountries.length > 0) && this.state.randomPropertiesCountries[this.state.step][prop].map((p, i) => {
                 return(
-                <div key={p+i} onClick={this.setAnswer.bind(this, prop, p)} style={this.getAnswerStyle(prop, p)}>{p}</div>
+                <div className="suggestion" key={p+i} onClick={this.setAnswer.bind(this, prop, p)} style={this.getAnswerStyle(prop, p)}>{p}</div>
             )
         })
         )
@@ -178,6 +216,9 @@ export default class Play extends Component {
     render() {
         return (
             <div>
+                <div className="header-score">
+                    <b>Score {this.state.score.goodAnswers}/{this.state.score.nbAnswers}</b>
+                </div>
                 <div className="progress-bar-container">
                     <div className="progress-bar-quizz">
                         <div className="progress-bar-quizz-fill" style={this.getProgressBarStyle()}></div>
@@ -187,11 +228,17 @@ export default class Play extends Component {
                     </div>
                 </div>
                 <div>
-                    <div>
+                    <div className="country-buttons-container">                
+                        <div className="section-play-buttons">
+                            <button type="button" className={(this.state.step !== 0) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, false)}>Previous</button>
+                        </div>
                         <div className="country-info">
                             <div className="country-container">
                                 <img src={this.props.countries[this.getStep()].flag} alt="country" height="100" />
                             </div>
+                        </div>
+                        <div className="section-play-buttons">
+                            <button type="button" className={(this.state.step !== 9) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, true)}>Next</button>
                         </div>
                     </div>
                     <div className="quizz-info">
@@ -208,18 +255,14 @@ export default class Play extends Component {
                     })}
                     </div>
                     <div className="confirm-button">
-                        <button type="button" className="btn btn-primary" onClick={this.confirmAnswers.bind(this)}>Confirm</button>
+                       
                     </div>
-                </div>
-                <div className="section-play-buttons">
-                    <button type="button" className={(this.state.step !== 0) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, false)}>Previous</button>
-                    <button type="button" className={(this.state.step !== 9) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, true)}>Next</button>
                 </div>
             </div>
         )
     }
 }
-
+//<button type="button" className="btn btn-primary" onClick={this.confirmAnswers.bind(this)}>Confirm</button>
 /* 
 <p>Name: <b>{this.props.countries[this.state.step].name}</b><br></br>
     Population: <b>{this.props.countries[this.state.step].population}</b><br></br>

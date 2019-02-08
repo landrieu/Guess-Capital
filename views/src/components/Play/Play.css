@@ -56,11 +56,38 @@
 
 .round{
     height: 14px;
+    position: relative;
+    overflow: hidden;
     width: 14px;
     border-radius: 12px;
     background-color: #b8b8b8;
+    transition: 1s;
 }
 
 .step-completed{
     background-color: #007bff;
+}
+
+.suggestion{
+    transition: 1s;
+}
+
+.country-buttons-container{
+    display: inline-flex;
+    justify-content: space-between;
+    width: 67%;
+    align-items: center;
+    margin: 25px 0;
+}
+.header-score{
+    font-size: 23px;
+    margin: 10px 0;
+}
+
+.partial-round{
+    background-color: #007bff;
+    transition: 0.5s;
+    bottom: 0;
+    position: absolute;
+    width: 14px;
 }

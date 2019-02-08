@@ -102,11 +102,11 @@ func initializeRoutes() {
 	//Continent
 	//api.GET("/continents", GetContinentFromContinentName)
 
-
 	api.GET("/countries/country/:countryCode", GetCountryFromCountryCode)
 	api.GET("/countries/continent/:continentName", GetContinentFromContinentName)
 	api.POST("/countries/addPeople/:countryCode", AddPeople)
 
+	router.NoRoute(defaultHandler)
 }
 
 func middleware(c *gin.Context) {
@@ -230,4 +230,14 @@ func loadCountries() {
 
 	currentParameters = RequestParameters{"continent", defaultContinent}
 	countries = countriesRequested
+}
+
+func defaultHandler(c *gin.Context) {
+
+	var response ResponseObject
+
+	response.Found = false
+	response.Message = "Continent not found"
+
+	c.JSON(http.StatusNotFound, response)
 }
