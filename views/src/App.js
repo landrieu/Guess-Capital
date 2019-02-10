@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom';
-import {browserHistory} from 'react-router';
+import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
 import cloneDeep from 'lodash/cloneDeep';
 
 //Components
@@ -13,7 +12,7 @@ import logo from './logo.svg';
 import './App.css';
 
 const ContinentType = "continent";
-const CountryType = "country"
+//const CountryType = "country";
 
 class App extends Component {
 
@@ -95,21 +94,25 @@ class App extends Component {
     });*/
   }
 
-  addPopulation(){
+  /*addPopulation(){
     var countryCode = document.getElementById('country').value;
     if(!countryCode) return
     axios.post(Parameters.API_PATH + 'api/countries/addPeople/' + countryCode)
       .then(res => {
           console.log(res);
     });
-  }
+  }*/
 
   isCountryRequester = () => {
     return this.state.countryRequested.flag !== undefined;
   }
 
   selectRegion = (region) => {
-    this.sendRequest(this.sendCountryRequest, {apiPath: "/countries/continent", param: region}, (success) => {
+    if(region === this.state.regionSelected){
+      return;
+    }
+
+    this.sendRequest(this.sendCountryRequest, {apiPath: "/continents", param: region}, (success) => {
       if(success){
         this.setState({regionSelected: region});
       }

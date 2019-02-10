@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
 import {Redirect, Link} from 'react-router-dom';
+import update from 'react-addons-update'; 
 import './Play.css';
 
 export default class Play extends Component {
@@ -98,7 +99,8 @@ export default class Play extends Component {
     setStep = (increment) => {
         if(!increment && this.state.step < 1)  return;
         if(increment && this.state.step === (this.props.nbCountries - 1)) return;
-        this.setState({step: (this.state.step += (increment ? 1 : (-1))) });
+        let newState = increment ? this.state.step + 1 : this.state.step - 1;
+        this.setState({step: newState});
     }
 
     getCountryProperty = (prop) => {
@@ -148,6 +150,7 @@ export default class Play extends Component {
     setAnswer = (prop, ans) => {
         if(!this.state.quizzAnswers[this.state.step][prop]){
             this.state.quizzAnswers[this.state.step][prop] = ans;
+            let step = this.state.step;
             let tempScore = this.state.score;
  
             if(ans === this.props.countries[this.state.step][prop]){
@@ -155,7 +158,12 @@ export default class Play extends Component {
             }
             tempScore.nbAnswers += 1;
     
-            this.setState({quizzAnswers: this.state.quizzAnswers, score: tempScore});
+            //this.setState({quizzAnswers: this.state.quizzAnswers, score: tempScore});
+            this.setState({
+                //quizzAnswers: update(this.state.quizzAnswers, {step: {name: {$set: ans}}}),
+                quizzAnswers: this.state.quizzAnswers,
+                score: tempScore,
+            });
         }
     }
 
