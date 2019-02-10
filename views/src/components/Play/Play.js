@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
 import cloneDeep from 'lodash/cloneDeep';
+import {Redirect, Link} from 'react-router-dom';
 import './Play.css';
 
 export default class Play extends Component {
     state = {
         step: 0,
-        challengeSteps: [],
         quizzAnswers: [],
         randomPropertiesCountries: [],
-        //currentSuggestions: null,
-        quizzProperties: ["name", "capital"/*, "population"*/],
+        quizzProperties: ["name", "capital"/*, "population", "alpha3Code"*/],
         currentAnswer: {},
         score: {
             goodAnswers: 0,
@@ -18,15 +17,19 @@ export default class Play extends Component {
     }
 
     componentDidMount(){
+
+       if(!this.props.countries || this.props.countries.length === 0){
+            return;
+       }
+
         this.pickRandomProperties();
         
-        var n = 10;
+        var n = this.props.nbCountries;
         var arr = []
         for (var i = 0; i < n; i++){
             arr.push({});
         }
         this.setState({quizzAnswers: arr});
-        //this.initChallengeSteps();
     }
 
     mixCountriesProperties = (randomPropertiesCountries) => {
@@ -47,7 +50,7 @@ export default class Play extends Component {
         var tempShuffledArr = [];
         var tempShuffledObj = {};
         
-        for(let i = 0; i < 10; i++){
+        for(let i = 0; i < this.props.nbCountries; i++){
             tempShuffledObj = {};
             this.state.quizzProperties.forEach((p) => {
                 tempShuffledObj[p] = shuffleArray(randomPropertiesCountries[i][p]);
@@ -65,13 +68,17 @@ export default class Play extends Component {
             var continentCountries = cloneDeep(this.props.continentCountries);
             var tempProp = {};
             var tempArr, randomNumber;
-            var properties = ["name", "capital", "population"];
+            var properties = this.state.quizzProperties;
 
             properties.forEach((prop) => {
                 tempArr = [];
                 for(let i = 0; i < 3; i++){
                     randomNumber = Math.floor(Math.random() * continentCountries.length);
-                    tempArr.push(continentCountries[randomNumber][prop]);
+                    if(continentCountries[randomNumber][prop] !== this.props.countries[idx][prop]){
+                        tempArr.push(continentCountries[randomNumber][prop]);
+                    }else{
+                        i--;
+                    }
                     continentCountries.splice(randomNumber, 1);
                 }
                 tempArr.splice( Math.floor(Math.random()*3), 0, this.props.countries[idx][prop]);
@@ -80,7 +87,7 @@ export default class Play extends Component {
             return tempProp;
         };
         
-        for(let i = 0; i < 10; i++){
+        for(let i = 0; i < this.props.nbCountries; i++){
             randomProp.push(pickRandomProp(i));
         }
 
@@ -90,35 +97,26 @@ export default class Play extends Component {
 
     setStep = (increment) => {
         if(!increment && this.state.step < 1)  return;
-        if(increment && this.state.step > 8) return;
-        let newStep = increment ? this.state.step + 1 : this.state.step - 1;
-        this.setState({step: newStep});
-    }
-
-    getStep = () => {
-        return this.state.step;
+        if(increment && this.state.step === (this.props.nbCountries - 1)) return;
+        this.setState({step: (this.state.step += (increment ? 1 : (-1))) });
     }
 
     getCountryProperty = (prop) => {
-        return this.props.countries[this.getStep()][prop];
+        return this.props.countries[this.state.step][prop];
     }
 
-    /*setCurrentSuggestions = (step) => {
-        console.log(s + " " + this.state.step);
-        let s =  step || this.state.step;
-        this.setState({currentSuggestions: this.state.randomPropertiesCountries[s]});
-    }*/
+
     getCurrentProperties = (prop) => {
         if(!(this.state.randomPropertiesCountries.length > 0)){
             return null;
         }
-        console.log(prop);
-        return this.state.randomPropertiesCountries[this.getStep()][prop];
+
+        return this.state.randomPropertiesCountries[this.state.step][prop];
     }
 
     getProgressBarStyle = () => {
         return {
-            width: (100 * (this.state.step / 9)) + "%",
+            width: (100 * (this.state.step / (this.props.nbCountries - 1))) + "%",
         }
     }
 
@@ -127,7 +125,7 @@ export default class Play extends Component {
         let answeredDone;
         let nbProperties = this.state.quizzProperties.length;
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.props.nbCountries; i++) {
             answeredDone = 0
             if(this.state.quizzAnswers.length > 0){
                 for(let j = 0; j < this.state.quizzProperties.length; j++){
@@ -165,42 +163,27 @@ export default class Play extends Component {
         let step = this.state.step;
         let correctAnswer = this.props.countries[step][prop];
         let currentAnswer = this.state.quizzAnswers[this.state.step][prop];
-        let backgroundColor = "#f5f5f5";
-        let color = "#212529";
-        let fontWeight = "normal";
-        let borderColor = "#a5a5a5";
-
-        //let correctSuggestion = correctAnswer === p;
-        //let isUserCorrect = correctAnswer === currentAnswer;
+        let style = defaultAnswerStyle;
 
         if(correctAnswer === p && correctAnswer === currentAnswer){
-            backgroundColor = "#2aa876";
-            color = "white";
-            fontWeight = 500;
-            borderColor = "#2ba896";
+            style = correctAnswerStyle;
         }else if(currentAnswer && currentAnswer === p){
-            backgroundColor = "#e8554e";
-            color = "white";
-            fontWeight = 500;
-            borderColor = "#e85549";
+            style = wrongAnswerStyle;
         }else if(currentAnswer && correctAnswer === p){
-            backgroundColor = "#2aa876";
-            color = "white";
-            fontWeight = 500;
-            borderColor = "#2ba896";
+            style = correctAnswerStyle;
         }
 
-        return{
-            backgroundColor: backgroundColor,
-            color: color,
-            fontWeight: fontWeight,
-            borderColor: borderColor
-        }
+        return style;
     }
 
-    confirmAnswers = () => {
-        console.log("Confirm");
-        
+    displayGoHomeButton(){
+        if(this.state.score.nbAnswers === this.props.nbCountries * this.state.quizzProperties.length){
+            return(
+                <Link to="/"><button type="button" className="btn btn-primary">
+                    Go home
+                </button></Link>
+            )
+        }
     }
 
     renderRandomProp(prop){        
@@ -214,6 +197,10 @@ export default class Play extends Component {
     }
 
     render() {
+        if(!this.props.countries || this.props.countries.length === 0){
+            return <Redirect to="/"/>
+        }
+
         return (
             <div>
                 <div className="header-score">
@@ -234,11 +221,11 @@ export default class Play extends Component {
                         </div>
                         <div className="country-info">
                             <div className="country-container">
-                                <img src={this.props.countries[this.getStep()].flag} alt="country" height="100" />
+                                <img src={this.props.countries[this.state.step].flag} alt="country" height="100" />
                             </div>
                         </div>
                         <div className="section-play-buttons">
-                            <button type="button" className={(this.state.step !== 9) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, true)}>Next</button>
+                            <button type="button" className={(this.state.step !== (this.props.nbCountries - 1)) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, true)}>Next</button>
                         </div>
                     </div>
                     <div className="quizz-info">
@@ -255,21 +242,34 @@ export default class Play extends Component {
                     })}
                     </div>
                     <div className="confirm-button">
-                       
+                       {this.displayGoHomeButton()}
                     </div>
                 </div>
             </div>
         )
     }
 }
-//<button type="button" className="btn btn-primary" onClick={this.confirmAnswers.bind(this)}>Confirm</button>
-/* 
-<p>Name: <b>{this.props.countries[this.state.step].name}</b><br></br>
-    Population: <b>{this.props.countries[this.state.step].population}</b><br></br>
-    Region: <b>{this.props.countries[this.state.step].region}</b><br></br>
-    Subregion: <b>{this.props.countries[this.state.step].subregion}</b><br></br>
-    Capital: <b>{this.props.countries[this.state.step].capital}</b></p>
-*/
+
+const correctAnswerStyle = {
+    backgroundColor: "#2aa876",
+    color:           "white",
+    fontWeight:      500,
+    borderColor:     "#2ba896"
+}
+
+const wrongAnswerStyle = {
+    backgroundColor: "#e8554e",
+    color:           "white",
+    fontWeight:      500,
+    borderColor:     "#e85549"
+}
+
+const defaultAnswerStyle = {
+    backgroundColor: "#f5f5f5",
+    color:           "#212529",
+    fontWeight:      "normal",
+    borderColor:     "#a5a5a5"
+}
 
 
 /**

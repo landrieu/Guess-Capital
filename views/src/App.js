@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
+import {BrowserRouter as Router, Route, Link, Redirect} from 'react-router-dom';
+import {browserHistory} from 'react-router';
 import cloneDeep from 'lodash/cloneDeep';
 
 //Components
@@ -22,7 +23,8 @@ class App extends Component {
     regions: ["africa", "americas", "asia", "europe", "oceania"],
     pendingRequest: false,
     regionSelected: "Asia",
-    randomCountries: []
+    randomCountries: [],
+    nbCountries: 6
   } 
 
   componentDidMount(){
@@ -51,7 +53,14 @@ class App extends Component {
 
     axios.get(url)
       .then(res => {
-        this.setState({countries: res.data.results});
+        /*let nbCountries;
+        if(this.state.countries.length < this.state.nbCountries){
+          nbCountries = this.state.countries.length;
+        }else{
+          nbCountries = this.state.nbCountries;
+        }*/
+
+        this.setState({countries: res.data.results/*, nbCountries: nbCountries*/});
         this.setRequestParameters(res.data);
       });
   }
@@ -117,7 +126,7 @@ class App extends Component {
   }
 
   pickRandomCountries = () => {
-    let nbCountries = 10;
+    let nbCountries = this.state.nbCountries;
     var randomNumber;
     var randomCountries = [];
     var countriesCopy = cloneDeep(this.state.countries);
@@ -189,11 +198,6 @@ class App extends Component {
                 })}
               </div>
               {this.renderLoadingLogo()}
-              <div className="form-country">
-                <input id="country" type="text" />
-                <button type="button" className="btn btn-primary" onClick={this.searchCountry}>Search</button>
-                <button type="button" className="btn btn-secondary" onClick={this.addPopulation}>Add Pop</button>
-              </div>
               <div className="section-button-play">
                 <Link to="/play" onClick={this.pickRandomCountries}>
                   <button type="button" className="btn btn-primary">Play</button>
@@ -204,7 +208,11 @@ class App extends Component {
             )}/>
             <Route exact path="/play" render={props => (
               <React.Fragment>
-                <Play countries={this.state.randomCountries} continentCountries={this.state.countries}/>
+                <Play 
+                countries={this.state.randomCountries} 
+                continentCountries={this.state.countries}
+                nbCountries={this.state.nbCountries}
+                />
               </React.Fragment>
             )}/>
           </div>
@@ -215,3 +223,9 @@ class App extends Component {
 }
 
 export default App;
+
+/*<div className="form-country">
+<input id="country" type="text" />
+<button type="button" className="btn btn-primary" onClick={this.searchCountry}>Search</button>
+<button type="button" className="btn btn-secondary" onClick={this.addPopulation}>Add Pop</button>
+</div>*/
