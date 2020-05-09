@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import cloneDeep from 'lodash/cloneDeep';
 import {Redirect, Link} from 'react-router-dom';
-import update from 'react-addons-update'; 
+import Progress from './Progress/Progress';
+import Answers from './Answers/Answers';
+import Step from './Step/Step';
 import './Play.css';
 
 export default class Play extends Component {
@@ -66,7 +67,7 @@ export default class Play extends Component {
         
         var randomProp = [];
         var pickRandomProp = (idx) => {
-            var continentCountries = cloneDeep(this.props.continentCountries);
+            var continentCountries = [...this.props.continentCountries];
             var tempProp = {};
             var tempArr, randomNumber;
             var properties = this.state.quizzProperties;
@@ -96,112 +97,27 @@ export default class Play extends Component {
         this.mixCountriesProperties(randomProp);
     }
 
-    setStep = (increment) => {
-        if(!increment && this.state.step < 1)  return;
-        if(increment && this.state.step === (this.props.nbCountries - 1)) return;
-        let newState = increment ? this.state.step + 1 : this.state.step - 1;
-        this.setState({step: newState});
+    changeStep = (newStep) => {
+        this.setState({step: newStep});
     }
 
-    getCountryProperty = (prop) => {
-        return this.props.countries[this.state.step][prop];
-    }
-
-
-    getCurrentProperties = (prop) => {
-        if(!(this.state.randomPropertiesCountries.length > 0)){
-            return null;
-        }
-
-        return this.state.randomPropertiesCountries[this.state.step][prop];
-    }
-
-    getProgressBarStyle = () => {
-        return {
-            width: (100 * (this.state.step / (this.props.nbCountries - 1))) + "%",
-        }
-    }
-
-    createRounds = () => {
-        let rounds = [];
-        let answeredDone;
-        let nbProperties = this.state.quizzProperties.length;
-
-        for (let i = 0; i < this.props.nbCountries; i++) {
-            answeredDone = 0
-            if(this.state.quizzAnswers.length > 0){
-                for(let j = 0; j < this.state.quizzProperties.length; j++){
-                    if(this.state.quizzAnswers[i][this.state.quizzProperties[j]]){
-                        answeredDone += 1;
-                    }
-                }
-            }
-
-            rounds.push(
-            <div className="round" key={"round" + i}>
-                <div className="partial-round" style={{height: ((answeredDone/nbProperties) * 100) + "%"}}>
-                </div>
-            </div>
-            )
-        }
-        return rounds
-    }
-
-    setAnswer = (prop, ans) => {
-        if(!this.state.quizzAnswers[this.state.step][prop]){
-            this.state.quizzAnswers[this.state.step][prop] = ans;
-            let step = this.state.step;
-            let tempScore = this.state.score;
- 
-            if(ans === this.props.countries[this.state.step][prop]){
-                tempScore.goodAnswers += 1;
-            }
-            tempScore.nbAnswers += 1;
-    
-            //this.setState({quizzAnswers: this.state.quizzAnswers, score: tempScore});
-            this.setState({
-                //quizzAnswers: update(this.state.quizzAnswers, {step: {name: {$set: ans}}}),
-                quizzAnswers: this.state.quizzAnswers,
-                score: tempScore,
-            });
-        }
-    }
-
-    getAnswerStyle = (prop, p) => {
-        let step = this.state.step;
-        let correctAnswer = this.props.countries[step][prop];
-        let currentAnswer = this.state.quizzAnswers[this.state.step][prop];
-        let style = defaultAnswerStyle;
-
-        if(correctAnswer === p && correctAnswer === currentAnswer){
-            style = correctAnswerStyle;
-        }else if(currentAnswer && currentAnswer === p){
-            style = wrongAnswerStyle;
-        }else if(currentAnswer && correctAnswer === p){
-            style = correctAnswerStyle;
-        }
-
-        return style;
+    setAnswersAndScore = (quizzAnswers, tempScore) => {
+        this.setState({
+            quizzAnswers: quizzAnswers,
+            score: tempScore,
+        });
     }
 
     displayGoHomeButton(){
         if(this.state.score.nbAnswers === this.props.nbCountries * this.state.quizzProperties.length){
             return(
-                <Link to="/"><button type="button" className="btn btn-primary">
-                    Go home
-                </button></Link>
+                <Link to="/">
+                    <button type="button" className="btn btn-primary">
+                        Go home
+                    </button>
+                </Link>
             )
         }
-    }
-
-    renderRandomProp(prop){        
-        return(
-            (this.state.randomPropertiesCountries.length > 0) && this.state.randomPropertiesCountries[this.state.step][prop].map((p, i) => {
-                return(
-                <div className="suggestion" key={p+i} onClick={this.setAnswer.bind(this, prop, p)} style={this.getAnswerStyle(prop, p)}>{p}</div>
-            )
-        })
-        )
     }
 
     render() {
@@ -211,44 +127,44 @@ export default class Play extends Component {
 
         return (
             <div>
-                <div className="header-score">
-                    <b>Score {this.state.score.goodAnswers}/{this.state.score.nbAnswers}</b>
-                </div>
-                <div className="progress-bar-container">
-                    <div className="progress-bar-quizz">
-                        <div className="progress-bar-quizz-fill" style={this.getProgressBarStyle()}></div>
-                    </div>
-                    <div className="round-steps">
-                        {this.createRounds()}
-                    </div>
-                </div>
+                <Progress 
+                    step={this.state.step}
+                    nbCountries={this.props.nbCountries}
+                    quizzProperties={this.state.quizzProperties}
+                    quizzAnswers={this.state.quizzAnswers}
+                    score={this.state.score}
+                />
                 <div>
+
                     <div className="country-buttons-container">                
-                        <div className="section-play-buttons">
-                            <button type="button" className={(this.state.step !== 0) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, false)}>Previous</button>
-                        </div>
+                        <Step
+                            step={this.state.step}
+                            nbCountries={this.props.nbCountries}
+                            next={false}
+                            changeStep={this.changeStep.bind(this)}
+                        />
                         <div className="country-info">
                             <div className="country-container">
                                 <img src={this.props.countries[this.state.step].flag} alt="country" height="100" />
                             </div>
                         </div>
-                        <div className="section-play-buttons">
-                            <button type="button" className={(this.state.step !== (this.props.nbCountries - 1)) ? "btn btn-primary" : "btn btn-secondary"} onClick={this.setStep.bind(this, true)}>Next</button>
-                        </div>
+                        <Step
+                            step={this.state.step}
+                            nbCountries={this.props.nbCountries}
+                            next={true}
+                            changeStep={this.changeStep.bind(this)}
+                        />
                     </div>
-                    <div className="quizz-info">
-                    {this.state.quizzProperties.map((prop, i) => {                       
-                        return (
-                        <div className="" key={i + " " + prop} >
-                            <div className="quizz-prop-container">
-                                <div className="quizz-prop-inner">
-                                    {this.renderRandomProp(prop)}
-                                </div>
-                            </div>
-                        </div>
-                        ) 
-                    })}
-                    </div>
+                    <Answers
+                        step={this.state.step}
+                        nbCountries={this.props.nbCountries}
+                        quizzProperties={this.state.quizzProperties}
+                        quizzAnswers={this.state.quizzAnswers}
+                        score={this.state.score}
+                        randomPropertiesCountries={this.state.randomPropertiesCountries}
+                        countries={this.props.countries}
+                        setAnswersAndScore={this.setAnswersAndScore.bind(this)}
+                    />
                     <div className="confirm-button">
                        {this.displayGoHomeButton()}
                     </div>
@@ -258,28 +174,16 @@ export default class Play extends Component {
     }
 }
 
-const correctAnswerStyle = {
-    backgroundColor: "#2aa876",
-    color:           "white",
-    fontWeight:      500,
-    borderColor:     "#2ba896"
-}
-
-const wrongAnswerStyle = {
-    backgroundColor: "#e8554e",
-    color:           "white",
-    fontWeight:      500,
-    borderColor:     "#e85549"
-}
-
-const defaultAnswerStyle = {
-    backgroundColor: "#f5f5f5",
-    color:           "#212529",
-    fontWeight:      "normal",
-    borderColor:     "#a5a5a5"
-}
-
-
 /**
- * 
+ * getCountryProperty = (prop) => {
+        return this.props.countries[this.state.step][prop];
+    }
+
+    getCurrentProperties = (prop) => {
+        if(!(this.state.randomPropertiesCountries.length > 0)){
+            return null;
+        }
+
+        return this.state.randomPropertiesCountries[this.state.step][prop];
+    }
  */

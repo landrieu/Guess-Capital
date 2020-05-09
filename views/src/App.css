@@ -47,45 +47,6 @@ nav{
   /*background-color: #f8f9fa;*/
 }
 
-.select-regions{
-  margin-bottom: 40px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  height: 120px;
-}
-
-.select-region{
-  height: 120px;
-  display: block;
-  width: 17%;
-  min-width: 100px;
-  background: white;
-  /* border-radius: 3%; */
-  cursor: pointer;
-  border: 3px solid #e5e5e5;
-  overflow: hidden;
-}
-
-.select-region .select-country-image{
-  height: 120px;
-  background-size: cover;
-  background-position: center;
-  transition: transform .2s;
-}
-
-.select-region .select-country-image:hover{
-  transform: scale(1.1);
-}
-
-.select-region p{
-  font-size: 1em;
-  font-weight: 500;
-  height: auto;
-  height: initial;
-  margin: 0;
-}
-
 .country-info{
     display: block;
     margin-left: auto;
@@ -104,16 +65,6 @@ nav{
   min-width: 300px;
 }
 
-.region-selected{
-  border: 4px #473e3e solid;
-  background: border-box;
-}
-
-.region-selected .select-country-image{
-  background-size: cover;
-  background-position: center;
-}
-
 .form-country{
   display: flex;
   justify-content: space-around;
@@ -121,49 +72,6 @@ nav{
   margin-left: auto;
   margin-right: auto;
   height: auto;
-}
-
-.region-name-container{
-  height: 120px;
-  width: 16.6%;
-  position: absolute;
-  /* margin-left: auto; */
-  /* margin-right: auto; */
-  height: 7%;
-  /* background-color: #302b2bba; */
-  color: white;
-  z-index: 1;
-}
-.region-name-inner
-{
-  height: auto;
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: 45%;
-  min-width: fit-content;
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #28262682;
-}
-
-.select-region.africa .select-country-image{
-  background-image: url(https://images.unsplash.com/photo-1433477155337-9aea4e790195?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=793&q=80);
-}
-
-.select-region.asia .select-country-image{
-  background-image: url(https://us.123rf.com/450wm/zephyr18/zephyr181505/zephyr18150500169/40302664-pura-ulun-danu-bratan-hindu-temple-on-bratan-lake-bali-indonesia.jpg?ver=6);
-}
-
-.select-region.oceania .select-country-image{
-  background-image: url(https://us.123rf.com/450wm/tanyapuntti/tanyapuntti1309/tanyapuntti130900003/24690339-great-barrier-reef-coral-reef.jpg?ver=6);
-}
-
-.select-region.europe .select-country-image{
-  background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG5jnGHawM9rUUl_PHJN5pqvt8H49L3ASOEq7PwGXHo3DIDGZuTw);
-}
-
-.select-region.americas .select-country-image{
-  background-image: url(https://images.unsplash.com/photo-1534256009774-91785b13a331?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&w=1000&q=80);
 }
 
 .section-button-play{

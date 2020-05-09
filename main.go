@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"io/ioutil"
+	"log"
+	"path/filepath"
 
+	yaml "gopkg.in/yaml.v2"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
@@ -26,9 +30,6 @@ type Currency struct {
 	Code   string `json:"code"`
 	Name   string `json:"name"`
 	Symbol string `json:"symbol"`
-}
-
-type Coordinate struct {
 }
 
 type CountryJSON struct {
@@ -56,15 +57,20 @@ type RequestParameters struct {
 	Value string `json:"value"`
 }
 
-//var listTypes = ["country", "continent"]
+type Conf struct {
+	CountriesAPIRoot string `json:"countriesapiroot"`
+	DefaultContinent     string  `json:"defaultcontinent"`
+}
+
 var currentParameters RequestParameters
 var countries []CountryJSON
 var router *gin.Engine
-var countriesAPIRoot = "https://restcountries.eu/rest/v2/"
-var defaultContinent = "oceania"
-var currenciesAPIPath = "https://api.coinmarketcap.com/v1/ticker/?limit=0"
+var conf Conf
 
 func main() {
+	
+	conf.getConf()
+	fmt.Println(conf)
 	loadCountries()
 
 	// Set the router as the default one shipped with Gin
@@ -79,12 +85,24 @@ func main() {
 	router.Run(":8081")
 }
 
+func (c *Conf) getConf() *Conf {
+
+	absPath, _ := filepath.Abs("conf.yaml")
+	yamlFile, err := ioutil.ReadFile(absPath)
+	if err != nil {
+		log.Printf("yamlFile.Get err   #%v ", err)
+	}
+	err = yaml.Unmarshal(yamlFile, c)
+	if err != nil {
+		log.Fatalf("Unmarshal: %v", err)
+	}
+
+	return c
+}
+
 func initializeRoutes() {
 	// Setup route group for the API
 	api := router.Group("/api")
-	//api.POST("", handleVerification)
-	//api.OPTIONS("", handleVerification)
-	api.GET("", handleGet)
 
 	/****  REST API ****/
 	//Countries
@@ -102,9 +120,9 @@ func initializeRoutes() {
 	//Continent
 	//api.GET("/continents", GetContinentFromContinentName)
 
-	api.GET("/countries/country/:countryCode", GetCountryFromCountryCode)
-	api.GET("/countries/continent/:continentName", GetContinentFromContinentName)
-	api.POST("/countries/addPeople/:countryCode", AddPeople)
+	api.GET("/countries/:countryCode", GetCountryFromCountryCode)
+	api.GET("/continents/:continentName", GetContinentFromContinentName)
+	//api.POST("/countries/addPeople/:countryCode", AddPeople)
 
 	router.NoRoute(defaultHandler)
 }
@@ -119,12 +137,6 @@ func middleware(c *gin.Context) {
 	}
 
 	c.Next()
-}
-
-func handleGet(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Ok",
-	})
 }
 
 // Countries retrieves a list of available countries
@@ -157,24 +169,6 @@ func GetCountry(countryCode string, countryArray *[]CountryJSON) *CountryJSON {
 	return countryRequested
 }
 
-func (country *CountryJSON) addPeopleToPop(additionalPeople *int64) {
-	fmt.Print(country.Population, "\n")
-	if additionalPeople != nil {
-		country.Population = country.Population + *additionalPeople
-	} else {
-		country.Population++
-	}
-}
-
-func AddPeople(c *gin.Context) {
-	var countryCode = c.Param("countryCode")
-	var additionalPeople int64 = 60
-	countryRequested := GetCountry(countryCode, &countries)
-	countryRequested.addPeopleToPop(&additionalPeople)
-
-	c.JSON(http.StatusOK, &countries)
-}
-
 // GetCountryFromCountryCode
 func GetCountryFromCountryCode(c *gin.Context) {
 	countryCode := c.Param("countryCode")
@@ -196,7 +190,7 @@ func GetCountryFromCountryCode(c *gin.Context) {
 
 func GetContinentFromContinentName(c *gin.Context) {
 	var continentName = c.Param("continentName")
-	var url = countriesAPIRoot + "region/" + continentName
+	var url = conf.CountriesAPIRoot + "region/" + continentName
 	var countriesRequested = sendExtRequest(url)
 	var response ResponseObject
 
@@ -225,10 +219,10 @@ func sendExtRequest(url string) []CountryJSON {
 }
 
 func loadCountries() {
-	url := countriesAPIRoot + "region/" + defaultContinent
+	url := conf.CountriesAPIRoot + "region/" + conf.DefaultContinent
 	var countriesRequested = sendExtRequest(url)
 
-	currentParameters = RequestParameters{"continent", defaultContinent}
+	currentParameters = RequestParameters{"continent", conf.DefaultContinent}
 	countries = countriesRequested
 }
 
@@ -237,7 +231,27 @@ func defaultHandler(c *gin.Context) {
 	var response ResponseObject
 
 	response.Found = false
-	response.Message = "Continent not found"
+	response.Message = "Ressource not found"
 
 	c.JSON(http.StatusNotFound, response)
 }
+
+/*
+func (country *CountryJSON) addPeopleToPop(additionalPeople *int64) {
+	fmt.Print(country.Population, "\n")
+	if additionalPeople != nil {
+		country.Population = country.Population + *additionalPeople
+	} else {
+		country.Population++
+	}
+}
+
+func AddPeople(c *gin.Context) {
+	var countryCode = c.Param("countryCode")
+	var additionalPeople int64 = 60
+	countryRequested := GetCountry(countryCode, &countries)
+	countryRequested.addPeopleToPop(&additionalPeople)
+
+	c.JSON(http.StatusOK, &countries)
+}
+*/
