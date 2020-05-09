@@ -22,7 +22,7 @@ class App extends Component {
     pendingRequest: false,
     regionSelected: "Asia",
     randomCountries: [],
-    nbCountries: 2
+    nbCountries: 10
   } 
 
   componentDidMount(){
