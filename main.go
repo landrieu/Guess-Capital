@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"net/http"
 	"io/ioutil"
 	"log"
@@ -68,7 +69,6 @@ var router *gin.Engine
 var conf Conf
 
 func main() {
-	
 	conf.getConf()
 	fmt.Println(conf)
 	loadCountries()
@@ -82,12 +82,19 @@ func main() {
 	initializeRoutes()
 
 	// Start and run the server
-	router.Run(":8081")
+	router.Run(":8087")
 }
 
 func (c *Conf) getConf() *Conf {
-
-	absPath, _ := filepath.Abs("conf.yaml")
+	argsWithoutProg := os.Args[1:]
+	pathyml := ""
+	if len(argsWithoutProg) != 0{
+		pathyml = os.Args[1] 
+	}else{
+		pathyml = "conf.yaml"
+	}
+	
+	absPath, _ := filepath.Abs(pathyml)
 	yamlFile, err := ioutil.ReadFile(absPath)
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
@@ -102,7 +109,7 @@ func (c *Conf) getConf() *Conf {
 
 func initializeRoutes() {
 	// Setup route group for the API
-	api := router.Group("/api")
+	api := router.Group("/guess/api")
 
 	/****  REST API ****/
 	//Countries
@@ -130,7 +137,7 @@ func initializeRoutes() {
 func middleware(c *gin.Context) {
 	if c.Request.Method == "OPTIONS" || c.Request.Method == "GET" || c.Request.Method == "POST" {
 		c.Header("Allow", "POST, GET, OPTIONS")
-		c.Header("Access-Control-Allow-Origin", "http://localhost:3006")
+		c.Header("Access-Control-Allow-Origin", "http://localhost:8087")
 		c.Header("Access-Control-Allow-Headers", "origin, content-type, accept")
 		c.Header("Content-Type", "application/json")
 		c.Status(http.StatusOK)

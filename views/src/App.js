@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import { createBrowserHistory } from 'history';
 import axios from 'axios';
 import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import cloneDeep from 'lodash/cloneDeep';
 
 //Components
@@ -13,6 +15,10 @@ import './App.css';
 
 const ContinentType = "continent";
 //const CountryType = "country";
+
+export const history = createBrowserHistory({
+  basename: process.env.PUBLIC_URL
+});
 
 class App extends Component {
 
@@ -38,7 +44,7 @@ class App extends Component {
   }
 
   sendCountryRequest = (request) => {
-    let url = Parameters.API_PATH + 'api';
+    let url = Parameters.API_PATH;
     url += request.apiPath || "";
     url += request.param ? "/" + request.param : "";
 
@@ -94,10 +100,9 @@ class App extends Component {
 
   render() {
     return (
-      <Router>
+      <HashRouter>
         <div className="App">
             <div className="body">
-            {/* Main route */}
             <Route exact path="/" render={props => (
               <React.Fragment>
               <Header 
@@ -115,7 +120,6 @@ class App extends Component {
               </React.Fragment>  
             )}/>
 
-            {/* Play route */}
             <Route exact path="/play" render={props => (
               <React.Fragment>
                 <Play 
@@ -127,7 +131,7 @@ class App extends Component {
             )}/>
           </div>
         </div>
-      </Router>
+      </HashRouter>
     );
   }
 }

@@ -1,4 +1,5 @@
 var Parameters = {
+    //API_PATH: "api"
     API_PATH: "http://localhost:8081/"
 }
 

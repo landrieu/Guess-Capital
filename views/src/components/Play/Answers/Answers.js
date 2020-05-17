@@ -44,7 +44,6 @@ export default class Answers extends Component {
     setAnswer = (prop, ans) => {
         if(!this.props.quizzAnswers[this.props.step][prop]){
             this.props.quizzAnswers[this.props.step][prop] = ans;
-            let step = this.props.step;
             let tempScore = this.props.score;
  
             if(ans === this.props.countries[this.props.step][prop]){
